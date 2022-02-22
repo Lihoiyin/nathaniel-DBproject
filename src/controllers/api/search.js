@@ -1,8 +1,10 @@
 import fetch from 'node-fetch'
 
 const controllersApiSearch = async (req, res) => {
-  const testing = 'computers'
-  const url = `https://www.googleapis.com/books/v1/volumes?q=${testing}&key=AIzaSyB5noX_cJTwroPi1fLZ_qyJtI94Ah6qWKU`
+  const title = 'java'
+  const subject = ''
+  const author = ''
+  const url = `https://www.googleapis.com/books/v1/volumes?q=${title}+subject:${subject}+inauthor:${author}&key=AIzaSyB5noX_cJTwroPi1fLZ_qyJtI94Ah6qWKU`
   const booksData = await fetch(
     url,
     { method: 'GET' }
