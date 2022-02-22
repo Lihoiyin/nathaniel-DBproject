@@ -16,6 +16,7 @@ model User {
   passwordHash String
   likes        LikedBooks?
   records      Records?
+  avatar       String?
 }
 
 model LikedBooks {
