@@ -1,5 +1,5 @@
 {
-  "name": "[your_project_name_here]",
+  "name": "nathaniel-DBproject",
   "version": "1.0.0",
   "description": "",
   "main": "main.js",
@@ -26,10 +26,11 @@
     "method-override": "^3.0.0",
     "moment": "^2.29.1",
     "morgan": "^1.10.0",
+    "node-fetch": "^3.2.0",
     "node-sass": "^7.0.1",
     "passport": "^0.5.2",
     "passport-local": "^1.0.0",
-    "prisma": "^3.9.1",
+    "prisma": "^3.9.2",
     "yup": "^0.32.11"
   },
   "devDependencies": {
