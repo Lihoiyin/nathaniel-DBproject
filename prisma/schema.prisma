@@ -34,27 +34,7 @@ model Records {
 }
 
 model Book {
-  id         Int          @id @default(autoincrement())
-  bookId     Int          @unique
-  title      String
-  categories Categorie[]
-  authors    Author[]
-  image      String
-  desc       String
+  id         Int          @id
   LikedBooks LikedBooks[]
   Records    Records[]
-  saleInHk   Boolean
-  price      Int?
-}
-
-model Categorie {
-  id    Int    @id @default(autoincrement())
-  name  String
-  books Book[]
-}
-
-model Author {
-  id    Int    @id @default(autoincrement())
-  name  String
-  books Book[]
 }

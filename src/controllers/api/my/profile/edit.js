@@ -2,9 +2,9 @@ import yup from 'yup'
 import bcrypt from 'bcrypt'
 import _ from 'lodash'
 
-import prisma from '../../_helpers/prisma.js'
-import handleErrors from '../../_helpers/handle-errors.js'
-import uploadFileAsync from '../../_helpers/upload-file.js'
+import prisma from '../../../_helpers/prisma.js'
+import handleErrors from '../../../_helpers/handle-errors.js'
+import uploadFileAsync from '../../../_helpers/upload-file.js'
 
 const updateSchema = yup.object({
   email: yup.string().email().required(),
