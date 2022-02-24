@@ -33,7 +33,25 @@ const controllersApiAuthSignup = async (req, res) => {
       data: {
         email: verifiedData.email,
         avatar: verifiedData.avatar || 'https://lab-restful-api.s3.ap-northeast-2.amazonaws.com/profile.jpeg',
-        passwordHash: await bcrypt.hash(verifiedData.password, 10)
+        passwordHash: await bcrypt.hash(verifiedData.password, 10),
+        likedBooks: {
+          create: {
+            books: {
+              create: []
+            }
+          }
+        },
+        records: {
+          create: {
+            books: {
+              create: []
+            }
+          }
+        }
+      },
+      include: {
+        likedBooks: { include: { books: true } },
+        records: { include: { books: true } }
       }
     })
 

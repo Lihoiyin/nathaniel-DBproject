@@ -1,0 +1,58 @@
+<script>
+$(document).ready(() => {
+  $('#auth-logout').on('click', (e) => {
+    e.preventDefault()
+    axios({
+      method: 'DELETE',
+      url: '/api/auth/logout'
+    }).then(() => {
+      window.location.href = '/'
+    })
+  })
+})
+</script>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/">BOOKS</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-links">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbar-links">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <% if (user.id) { %>
+          <li class="nav-item">
+            <a class="nav-link" href="/my/wishlists">My Liked Books List</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/my/profile/edit">Recently Read</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/my/wishlists/new">My Profile</a>
+          </li>
+          <li class="nav-item">
+            <a id="auth-logout" class="nav-link text-danger" href="#">Logout</a>
+          </li>
+        <% } else { %>
+          <li class="nav-item">
+            <a class="nav-link" href="/signup">Signup</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/login">Login</a>
+          </li>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+</nav>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container-fluid">
+      <form id='search-form' class="d-flex">
+        <input id='search-title' class="form-control me-2" type="text" placeholder="Title" aria-label="Title">
+        <input id='search-author' class="form-control me-2" type="text" placeholder="Author" aria-label="Author">
+        <input id='search-category' class="form-control me-2" type="text" placeholder="Category" aria-label="Category">
+        <button class="btn btn-outline-success" type="submit">Search</button>
+      </form>
+  </div>
+</nav>

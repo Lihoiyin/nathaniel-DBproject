@@ -14,7 +14,7 @@ model User {
   id           Int         @id @default(autoincrement())
   email        String      @unique
   passwordHash String
-  likes        LikedBooks?
+  likedBooks   LikedBooks?
   records      Records?
   avatar       String?
 }
@@ -34,7 +34,10 @@ model Records {
 }
 
 model Book {
-  id         Int          @id
-  LikedBooks LikedBooks[]
-  Records    Records[]
+  id           Int         @id @default(autoincrement())
+  bookId       String      @unique
+  LikedBooks   LikedBooks? @relation(fields: [likedBooksId], references: [id])
+  likedBooksId Int?
+  Records      Records?    @relation(fields: [recordsId], references: [id])
+  recordsId    Int?
 }

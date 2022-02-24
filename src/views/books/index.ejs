@@ -1,0 +1,67 @@
+<%- contentFor('styles') %>
+<%- contentFor('scripts') %>
+<script>
+const generateBookCard = (bookCard) => {
+  return `
+    <div class="card col-12 col-md-5 col-lg-3" style="width: 18rem ;margin: 10px;margin-top:20px;">
+      <img src="${bookCard.volumeInfo.imageLinks.thumbnail || ''}" class="card-img-top" style="height: 250px;" alt="...">
+      <div class="card-body">
+        <h5 class="card-title">${bookCard.volumeInfo.title}</h5>
+        <p class="card-text">Authors: ${bookCard.volumeInfo.authors || 'Authors not found'}</p>
+        <p class="card-text">Categories: ${bookCard.volumeInfo.categories || 'Categories not found'}</p>
+
+      </div>
+    </div>
+  `
+}
+
+const generateBookCards = ({ isLoading, bookCards = [] } = {}) => {
+  if (isLoading) return `<div class="text-center mb-3">Loading...</div>`
+  if (bookCards.length === 0) {
+    return `
+      <h2 class="text-center mb-3">No Books Found!</h2>
+    `
+  }
+  return `
+    <div class="row">
+      <div class="">
+        <div id="books-list" class="row">
+          ${bookCards.map((bookCard) => generateBookCard(bookCard)).join('')}
+        </div>
+      </div>
+    </div>
+  `
+}
+
+const generatePage = (info) => {
+  const $page = $('#pages-books-index')
+  const $bookCards = generateBookCards(info)
+  $page.html('').append($bookCards)
+}
+
+$(document).ready(() => {
+
+$('#search-form').on('submit',(e) => {
+    e.preventDefault()
+    generatePage({ isLoading: true })
+    const title = $('#search-title').val()
+    const author = $('#search-author').val()
+    const category = $('#search-category').val()
+    const data = {title, author, category}
+    console.log(data);
+    axios({
+      method: 'GET',
+      url: '/api/books/search',
+      data
+    }).then((resp) => {
+      console.log(resp.data);
+      generatePage({ bookCards: resp.data.items})
+    })
+  })
+
+})
+</script>
+
+<%- contentFor('body') %>
+
+<div id="pages-books-index" class="container"></div>

@@ -4,8 +4,8 @@ import authenticateUser from './_middlewares/authenticate-user.js'
 const router = Router()
 
 // STATIC
-router.get('/', (await import('./controllers/static/home.js')).default)
-
+// test
+router.get('/123', (await import('./controllers/api/my/likes/test.js')).default)
 // API | BOOKS
 router.get('/api/books/search', (await import('./controllers/api/books/search.js')).default)
 router.get('/api/books/show', (await import('./controllers/api/books/show.js')).default)
@@ -18,11 +18,11 @@ router.get('/api/my/profile', authenticateUser('json'), (await import('./control
 router.put('/api/my/profile', authenticateUser('json'), (await import('./controllers/api/my/profile/edit.js')).default)
 // API | MY LIKESLIST
 router.get('/api/my/likeslist', authenticateUser('json'), (await import('./controllers/api/my/likes/likeslist.js')).default)
-router.post('/api/my/like', authenticateUser('json'), (await import('./controllers/api/my/likes/like.js')).default)
-router.delete('/api/my/like', authenticateUser('json'), (await import('./controllers/api/my/likes/unlike.js')).default)
+router.put('/api/my/like', authenticateUser('json'), (await import('./controllers/api/my/likes/like.js')).default)
+router.put('/api/my/unlike', authenticateUser('json'), (await import('./controllers/api/my/likes/unlike.js')).default)
 // API | MY RECORDS
 router.get('/api/my/record/recordslist', authenticateUser('json'), (await import('./controllers/api/my/likes/likeslist.js')).default)
-router.post('/api/my/record/record', authenticateUser('json'), (await import('./controllers/api/my/likes/like.js')).default)
+router.put('/api/my/record/record', authenticateUser('json'), (await import('./controllers/api/my/likes/like.js')).default)
 // PAGES | BOOKS
 router.get('/results', (await import('./controllers/pages/books/results.js')).default)
 router.get('/', (await import('./controllers/pages/books/index.js')).default)
