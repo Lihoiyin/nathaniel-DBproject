@@ -4,11 +4,12 @@ import authenticateUser from './_middlewares/authenticate-user.js'
 const router = Router()
 
 // STATIC
+router.get('/', (await import('./controllers/pages/books/index.js')).default)
 // test
 router.get('/123', (await import('./controllers/api/my/likes/test.js')).default)
 // API | BOOKS
 router.get('/api/books/search/:q1&:q2&:q3', (await import('./controllers/api/books/search.js')).default)
-router.get('/api/books/show', (await import('./controllers/api/books/show.js')).default)
+router.get('/api/books/show/:bookId', (await import('./controllers/api/books/show.js')).default)
 // API | Auth
 router.post('/api/auth/signup', (await import('./controllers/api/auth/signup.js')).default)
 router.post('/api/auth/login', (await import('./controllers/api/auth/login.js')).default)
@@ -25,7 +26,13 @@ router.get('/api/my/record/recordslist', authenticateUser('json'), (await import
 router.put('/api/my/record/record', authenticateUser('json'), (await import('./controllers/api/my/likes/like.js')).default)
 // PAGES | BOOKS
 router.get('/results', (await import('./controllers/pages/books/results.js')).default)
-router.get('/', (await import('./controllers/pages/books/index.js')).default)
+router.get('/books', (await import('./controllers/pages/books/index.js')).default)
+router.get('/book/:id', (await import('./controllers/pages/books/show.js')).default)
+
+// PAGES | MY BOOKS
+router.get('my/results', authenticateUser('json'), (await import('./controllers/pages/my/books/results.js')).default)
+router.get('my/books', authenticateUser('json'), (await import('./controllers/pages/my/books/index.js')).default)
+router.get('my/book/:id', authenticateUser('json'), (await import('./controllers/pages/my/books/show.js')).default)
 // PAGES | Auth
 router.get('/signup', (await import('./controllers/pages/auth/signup.js')).default)
 router.get('/login', (await import('./controllers/pages/auth/login.js')).default)

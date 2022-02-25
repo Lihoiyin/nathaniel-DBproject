@@ -2,9 +2,9 @@ import fetch from 'node-fetch'
 
 const controllersApiShowOne = async (req, res) => {
   const { bookId } = req.params
-
+  const url = `https://www.googleapis.com/books/v1/volumes/${bookId}`
   const bookData = await fetch(
-    `https://www.googleapis.com/books/v1/volumes/${bookId}`,
+    url,
     { method: 'GET' }
   ).then((response) => response.json())
     .then((data) => data)

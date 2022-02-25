@@ -1,0 +1,47 @@
+<%- contentFor('styles') %>
+<%- contentFor('scripts') %>
+<script>
+const bookId = window.location.href.split('/').reverse()[0]
+const generateBookCard = (bookCard) => {
+  return `
+    <div class="col-10" style="padding: 15px;">
+      <div id="${bookCard.id}" class="card book-card" style="margin-top: 15px;">
+        <div class="d-flex justify-content-center">
+          <img src="${bookCard.volumeInfo.imageLinks?.smallThumbnail || '../../images/img-not-found.jpg' }" class="card-img-top" style="width:35%" alt="...">
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">${bookCard.volumeInfo.title}</h5>
+          <p class="card-text">Authors: ${bookCard.volumeInfo.authors || 'Authors not found'}</p>
+          <p class="card-text">Description: ${bookCard.volumeInfo.description || 'Description not found'}</p>
+          <p class="card-text">Language: ${bookCard.volumeInfo.language || 'Language not found'}</p>
+          <p class="card-text">Publisher: ${bookCard.volumeInfo.publisher || 'Publisher not found'}</p>
+          <p class="card-text">Published Date: ${bookCard.volumeInfo.publishedDate || 'Published Date not found'}</p>
+          <a href="${bookCard.volumeInfo.previewLink} target="_blank""><p class="card-text">Preview Link On Google</a>
+        </div>
+      </div>
+    </div>
+  `
+}
+
+
+const generatePage = (info) => {
+  const $page = $('#pages-book-index')
+  const bookCard = generateBookCard(info)
+  $page.html('').append(bookCard)
+}
+
+$(document).ready(() => {
+
+    axios({
+      method: 'GET',
+      url: `/api/books/show/${bookId}`
+    }).then((resp) => {
+      console.log(resp.data);
+      generatePage(resp.data)
+    })
+})
+</script>
+
+<%- contentFor('body') %>
+
+<div id="pages-book-index" class="container d-flex justify-content-center"></div>

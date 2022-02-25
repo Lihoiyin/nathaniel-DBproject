@@ -39,7 +39,7 @@ $(document).ready(() => {
       url: '/api/auth/login',
       data
     }).then(() => {
-      window.location.href = `/`
+      window.location.href = `/mybooks`
     }).catch((err) => {
       generatePage({
         user: parseFormData(data),
