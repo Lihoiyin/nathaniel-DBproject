@@ -21,6 +21,11 @@ const generateForm = ({ user, errors } = {}) => {
             <input id="user-password-confirmation" class="form-control ${errors?.passwordConfirmation && 'is-invalid'}" name="passwordConfirmation" rows="3" value="${user?.passwordConfirmation || ''}" type="password"></input>
             <div class="invalid-feedback">${errors?.passwordConfirmation || ''}</div>
           </div>
+          <div class="mb-3">
+            <label for="user-avatar" class="form-label">Avatar (Optional)</label>
+            <input id="user-avatar" class="form-control" name="avatar" type="file"></input>
+            <div class="invalid-feedback">${errors?.avatar || ''}</div>
+          </div>
           <button class="btn btn-primary" type="submit">Submit</button>
         </form>
       </div>
@@ -44,7 +49,7 @@ $(document).ready(() => {
       url: '/api/auth/signup',
       data
     }).then(() => {
-      window.location.href = `/my/wishlists`
+      window.location.href = `/`
     }).catch((err) => {
       generatePage({
         user: parseFormData(data),

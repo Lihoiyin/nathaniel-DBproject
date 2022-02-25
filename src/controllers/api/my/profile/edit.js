@@ -7,7 +7,6 @@ import handleErrors from '../../../_helpers/handle-errors.js'
 import uploadFileAsync from '../../../_helpers/upload-file.js'
 
 const updateSchema = yup.object({
-  email: yup.string().email().required(),
   password: yup.string().test(
     'empty-or-6-characters-check',
     'password must be at least 6 characters',

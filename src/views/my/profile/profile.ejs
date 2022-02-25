@@ -1,0 +1,31 @@
+<%- contentFor('styles') %>
+<%- contentFor('scripts') %>
+<script>
+const generatePage= (profile) =>{
+  $('#pages-profile').html( `
+    <div class="col-12 col-md-5 " style="padding: 15px;">
+      <div class="card" style="margin-top: 15px;height:100%;width=100%;">
+      <img src="${profile.avatar || '../../images/img-not-found.jpg' }" class="card-img-top" style="height: 250px;" alt="...">
+        <div class="card-body">
+          <p class="card-text">ID: ${profile.id || 'ID not found'}</p>
+          <p class="card-text">Email: ${profile.email || 'Email not found'}</p>
+        </div>
+        <a href='/my/profile/edit' class='d-flex justify-content-center m-3'><button type="button" class="btn btn-primary">Edit</button></a>
+      </div>
+    </div>
+  `)
+}
+
+$(document).ready(() => {
+
+    axios({
+      method: 'GET',
+      url: '/api/my/profile'
+    }).then((resp) => {
+      console.log(resp.data);
+      generatePage(resp.data)
+    })
+})
+</script>
+<%- contentFor('body') %>
+<div id="pages-profile" class="container d-flex justify-content-center"></div>
