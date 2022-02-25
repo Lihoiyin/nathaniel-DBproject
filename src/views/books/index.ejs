@@ -46,10 +46,7 @@ $('#search-form').on('submit',(e) => {
     e.preventDefault()
     generatePage({ isLoading: true })
     const data = parseFormData(new FormData(e.target))
-    const title = data.title? `&${data.title}` : '&notFound'
-    const author = data.author? `&${data.author}` : '&notFound'
-    const category = data.category? `+${data.category}` : '&notFound'
-    const url = `/api/books/search/${data.title}${author}${category}`
+    const url = `/api/books/search/${data.title? `${data.title}` : 'notFound'}${data.author? `&${data.author}` : '&notFound'}${data.category? `+${data.category}` : '&notFound'}`
     axios({
       method: 'GET',
       url
