@@ -3,13 +3,14 @@
 <script>
 const generateBookCard = (bookCard) => {
   return `
-    <div class="card col-12 col-md-5 col-lg-3" style="width: 18rem ;margin: 10px;margin-top:20px;">
-      <img src="${bookCard.volumeInfo.imageLinks.thumbnail || ''}" class="card-img-top" style="height: 250px;" alt="...">
-      <div class="card-body">
-        <h5 class="card-title">${bookCard.volumeInfo.title}</h5>
-        <p class="card-text">Authors: ${bookCard.volumeInfo.authors || 'Authors not found'}</p>
-        <p class="card-text">Categories: ${bookCard.volumeInfo.categories || 'Categories not found'}</p>
-
+    <div class="col-12 col-md-5 col-lg-3" style="padding: 15px;">
+      <div class="card" style="margin-top: 15px;height:100%;">
+      <img src="${bookCard.volumeInfo.imageLinks? bookCard.volumeInfo.imageLinks.thumbnail : '../../images/img-not-found.jpg' }" class="card-img-top" style="height: 250px;" alt="...">
+        <div class="card-body">
+          <h5 class="card-title">${bookCard.volumeInfo.title}</h5>
+          <p class="card-text">Authors: ${bookCard.volumeInfo.authors || 'Authors not found'}</p>
+          <p class="card-text">Categories: ${bookCard.volumeInfo.categories || 'Categories not found'}</p>
+        </div>
       </div>
     </div>
   `
@@ -25,7 +26,7 @@ const generateBookCards = ({ isLoading, bookCards = [] } = {}) => {
   return `
     <div class="row">
       <div class="">
-        <div id="books-list" class="row">
+        <div id="books-list" class="row d-flex align-items-stretch justify-content-around">
           ${bookCards.map((bookCard) => generateBookCard(bookCard)).join('')}
         </div>
       </div>
@@ -44,15 +45,14 @@ $(document).ready(() => {
 $('#search-form').on('submit',(e) => {
     e.preventDefault()
     generatePage({ isLoading: true })
-    const title = $('#search-title').val()
-    const author = $('#search-author').val()
-    const category = $('#search-category').val()
-    const data = {title, author, category}
-    console.log(data);
+    const data = parseFormData(new FormData(e.target))
+    const title = data.title? `&${data.title}` : '&notFound'
+    const author = data.author? `&${data.author}` : '&notFound'
+    const category = data.category? `+${data.category}` : '&notFound'
+    const url = `/api/books/search/${data.title}${author}${category}`
     axios({
       method: 'GET',
-      url: '/api/books/search',
-      data
+      url
     }).then((resp) => {
       console.log(resp.data);
       generatePage({ bookCards: resp.data.items})

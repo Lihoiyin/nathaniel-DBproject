@@ -7,7 +7,7 @@ const router = Router()
 // test
 router.get('/123', (await import('./controllers/api/my/likes/test.js')).default)
 // API | BOOKS
-router.get('/api/books/search', (await import('./controllers/api/books/search.js')).default)
+router.get('/api/books/search/:q1&:q2&:q3', (await import('./controllers/api/books/search.js')).default)
 router.get('/api/books/show', (await import('./controllers/api/books/show.js')).default)
 // API | Auth
 router.post('/api/auth/signup', (await import('./controllers/api/auth/signup.js')).default)
