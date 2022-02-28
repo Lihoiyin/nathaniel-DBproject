@@ -78,17 +78,17 @@ $('#search-form').on('submit',(e) => {
     e.preventDefault()
     generatePage({ isLoading: true })
     const data = parseFormData(new FormData(e.target))
-    const title = data.title
-    const author = data.author
-    const category = data.category
-    const url = `/api/books/search/${title? `${title}` : 'notFound'}${author? `&${author}` : '&notFound'}${category? `+${category}` : '&notFound'}`
+    const url = `/api/books/search/${data.title? `${data.title}` : 'notFound'}${data.author? `&${data.author}` : '&notFound'}${data.category? `&${data.category}` : '&notFound'}`
     axios({
       method: 'GET',
       url
     }).then((resp) => {
       console.log(resp.data);
       generatePage({ bookCards: resp.data.items})
-      $('#pages-books-index').prepend(`<h1>Results for Searching "${title} + ${author} + ${category}"</h1>`)
+      const title = data.title? (data.author? data.title + ' + ' : data.title) : ''
+      const author = data.author? (data.category? data.author + ' + ' : data.author) : ''
+      const category = data.category
+      $('#pages-books-index').prepend(`<h1>Results for Searching "${title}${author}${category}"</h1>`)
     })
   })
 
