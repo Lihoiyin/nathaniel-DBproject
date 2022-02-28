@@ -72,14 +72,8 @@ $('#search-form').on('submit',(e) => {
       $('#pages-books-index').prepend(`<h1>Results for Searching "${title}${author}${category}"</h1>`)
     })
   })
-
-    $('#pages-books-index').on('click','.book-card',(e) => {
-    axios({
-      method: 'PUT',
-      url:`/api/my/record/${e.target.id}`,
-    }).then((resp) => {
+  $('#pages-books-index').on('click','.book-card',(e) => {
     window.location.href = `book/${e.target.id}`
-    })
   })
 
 })
