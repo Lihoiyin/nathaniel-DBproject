@@ -3,32 +3,27 @@ import handleErrors from '../../../_helpers/handle-errors.js'
 
 const controllersApiLikeslistCreate = async (req, res) => {
   try {
-    // const { session: { user: { id: userId } } } = req
-    console.log(req.body)
-    const likedBook = await prisma.likedBooks.update({
+    const { session: { user: { id: userId } } } = req
+    const likedBook = await prisma.user.update({
       where: {
-        userId: Number(req.body.id)
+        id: Number(userId)
       },
       data: {
-        books: {
+        likedBooks: {
           upsert: {
             create: {
-              bookId: '12'
+              bookId: req.params.bookId
             },
             update: {
-              bookId: '12'
+              bookId: req.params.bookId
             },
             where: {
-              bookId: '12'
+              bookId: req.params.bookId
             }
           }
         }
-      },
-      include: {
-        books: true
       }
     })
-    console.log(likedBook)
     return res.status(201).json(likedBook)
   } catch (err) {
     return handleErrors(res, err)

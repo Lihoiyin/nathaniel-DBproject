@@ -5,11 +5,13 @@ const generateBookCard = (bookCard) => {
   return `
     <div class="col-12 col-md-5 col-lg-3" style="padding: 15px;">
       <div class="card" style="margin-top: 15px;height:100%;">
-      <img id='${bookCard.id}' src="${bookCard.volumeInfo.imageLinks?.thumbnail || '../../images/img-not-found.jpg' }" class="card-img-top book-card" style="height: 250px;" alt="...">
+      <img id='${bookCard.id}' src="${bookCard.volumeInfo.imageLinks?.thumbnail || 'https://www.salonlfc.com/wp-content/uploads/2018/01/image-not-found-scaled-1150x647.png' }" class="card-img-top book-card" style="height: 250px;" alt="...">
         <div id='${bookCard.id}' class="card-body book-card">
-          <h5 class="card-title">${bookCard.volumeInfo.title}</h5>
-          <p class="card-text">Authors: ${bookCard.volumeInfo.authors || 'Authors not found'}</p>
-          <p class="card-text">Categories: ${bookCard.volumeInfo.categories || 'Categories not found'}</p>
+          <h5 id='${bookCard.id}' class="card-text card-body">${bookCard.volumeInfo.title}</h5>
+          <h6 id='${bookCard.id}' class="card-text card-body">Authors:
+            </br>${bookCard.volumeInfo.authors || 'Authors not found'}</p>
+          <h6 id='${bookCard.id}' class="card-text card-body">Categories:
+            </br>${bookCard.volumeInfo.categories || 'Categories not found'}</p>
         </div>
       </div>
     </div>
@@ -41,8 +43,6 @@ const generatePage = (info) => {
 }
 
 $(document).ready(() => {
-
-$('#search-form').on('submit',(e) => {
     e.preventDefault()
     generatePage({ isLoading: true })
     const data = parseFormData(new FormData(e.target))
@@ -54,13 +54,16 @@ $('#search-form').on('submit',(e) => {
       console.log(resp.data);
       generatePage({ bookCards: resp.data.items})
     })
-  })
 
-  $('#pages-books-index').on('click','.book-card',(e) => {
+    $('#pages-books-index').on('click','.book-card',(e) => {
+    axios({
+      method: 'PUT',
+      url:`/api/my/record/${e.target.id}`,
+    }).then((resp) => {
     window.location.href = `book/${e.target.id}`
-
+    })
   })
-})
+  })
 </script>
 
 <%- contentFor('body') %>

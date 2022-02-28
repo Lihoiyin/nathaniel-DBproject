@@ -3,15 +3,18 @@ import handleErrors from '../../../_helpers/handle-errors.js'
 
 const controllersApiLikeslistShow = async (req, res) => {
   try {
-    // const { session: { user: { id: userId } } } = req
-    const likedBooks = await prisma.likedBooks.findUnique({
+    const { session: { user: { id: userId } } } = req
+
+    const likedBooks = await prisma.user.findFirst({
       where: {
-        userId: 15
+        id: Number(userId)
       },
       select: {
-        books: true
+        likedBooks: true
       }
     })
+    console.log(likedBooks)
+
     return res.status(201).json(likedBooks)
   } catch (err) {
     return handleErrors(res, err)

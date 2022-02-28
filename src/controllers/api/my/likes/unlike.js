@@ -3,14 +3,14 @@ import handleErrors from '../../../_helpers/handle-errors.js'
 
 const controllersApiWishlistsDestroy = async (req, res) => {
   try {
-    // const { params: { id } } = req
-    const unlikedBook = await prisma.likedBooks.update({
+    const { session: { user: { id: userId } } } = req
+    const unlikedBook = await prisma.user.update({
       where: {
-        id: 2
+        id: Number(userId)
       },
       data: {
-        books: {
-          delete: { bookId: '2' }
+        likedBooks: {
+          delete: { bookId: req.params.bookId }
         }
       }
     })

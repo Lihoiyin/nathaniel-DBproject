@@ -11,33 +11,24 @@ datasource db {
 }
 
 model User {
-  id           Int         @id @default(autoincrement())
-  email        String      @unique
+  id           Int          @id @default(autoincrement())
+  email        String       @unique
   passwordHash String
-  likedBooks   LikedBooks?
-  records      Records?
+  likedBooks   LikedBook[]
+  bookRecords  BookRecord[]
   avatar       String?
 }
 
-model LikedBooks {
+model LikedBook {
   id     Int    @id @default(autoincrement())
-  user   User   @relation(fields: [userId], references: [id])
-  books  Book[]
-  userId Int    @unique
+  bookId String @unique
+  User   User?  @relation(fields: [userId], references: [id])
+  userId Int?
 }
 
-model Records {
+model BookRecord {
   id     Int    @id @default(autoincrement())
-  user   User   @relation(fields: [userId], references: [id])
-  books  Book[]
-  userId Int    @unique
-}
-
-model Book {
-  id           Int         @id @default(autoincrement())
-  bookId       String      @unique
-  LikedBooks   LikedBooks? @relation(fields: [likedBooksId], references: [id])
-  likedBooksId Int?
-  Records      Records?    @relation(fields: [recordsId], references: [id])
-  recordsId    Int?
+  bookId String @unique
+  User   User?  @relation(fields: [userId], references: [id])
+  userId Int?
 }

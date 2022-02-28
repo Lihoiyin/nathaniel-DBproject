@@ -13,7 +13,6 @@ const generateBookCard = (bookCard) => {
           <h6 id='${bookCard.id}' class="card-text card-body">Categories:
             </br>${bookCard.volumeInfo.categories || 'Categories not found'}</p>
         </div>
-        <button id='${bookCard.id}' type="button" class="btn btn-danger unlike-btn">Unlike this Book</button>
       </div>
     </div>
   `
@@ -24,7 +23,7 @@ const generateBookCard = (bookCard) => {
 const generatePage = (info) => {
   const $page = $('#books-list')
   if (info.length === 0) {
-    $page.html(`<h2 class="text-center mb-3">No Liked Books Found!</h2>`)
+    $page.html(`<h2 class="text-center mb-3">No Records Found!</h2>`)
   }
   info.forEach(element => {
     console.log(element);
@@ -42,23 +41,13 @@ const generatePage = (info) => {
 $(document).ready(() => {
     axios({
       method: 'GET',
-      url:`/api/my/likeslist`
+      url:`/api/my/recordslist`
     }).then((resp) => {
-      console.log(resp);
-      generatePage(resp.data.likedBooks)
+      console.log(resp.data.bookRecords);
+      generatePage(resp.data.bookRecords)
     })
-    $('#books-list').on('click','.unlike-btn',(e) => {
-      $(e.target).attr('disabled', true).text('Unliked')
-      axios({
-        method: 'PUT',
-        url:`/api/my/unlike/${e.target.id}`,
-    }).then(((resp) => {
-    window.location.href = ``
-    }))
-  })
 
-
-  $('#pages-books-index').on('click','.book-card',(e) => {
+      $('#pages-books-index').on('click','.book-card',(e) => {
     axios({
       method: 'PUT',
       url:`/api/my/record/${e.target.id}`,
@@ -67,7 +56,6 @@ $(document).ready(() => {
     })
   })
 })
-
 </script>
 
 <%- contentFor('body') %>

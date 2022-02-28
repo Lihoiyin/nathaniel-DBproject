@@ -49,7 +49,7 @@ $(document).ready(() => {
       url: '/api/auth/signup',
       data
     }).then(() => {
-      window.location.href = `/mybooks`
+      window.location.href = `/my/books`
     }).catch((err) => {
       generatePage({
         user: parseFormData(data),

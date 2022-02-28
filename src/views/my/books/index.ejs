@@ -1,19 +1,35 @@
 <%- contentFor('styles') %>
 <%- contentFor('scripts') %>
 <script>
+let likedList
+
+
 const generateBookCard = (bookCard) => {
+  let btn = generateButton(bookCard.id)
+  console.log(btn);
   return `
     <div class="col-12 col-md-5 col-lg-3" style="padding: 15px;">
       <div class="card" style="margin-top: 15px;height:100%;">
-      <img id='${bookCard.id}' src="${bookCard.volumeInfo.imageLinks?.thumbnail || '../../images/img-not-found.jpg' }" class="card-img-top book-card" style="height: 250px;" alt="...">
+      <img id='${bookCard.id}' src="${bookCard.volumeInfo.imageLinks?.thumbnail || 'https://www.salonlfc.com/wp-content/uploads/2018/01/image-not-found-scaled-1150x647.png' }" class="card-img-top book-card" style="height: 250px;" alt="...">
         <div id='${bookCard.id}' class="card-body book-card">
-          <h5 class="card-title">${bookCard.volumeInfo.title}</h5>
-          <p class="card-text">Authors: ${bookCard.volumeInfo.authors || 'Authors not found'}</p>
-          <p class="card-text">Categories: ${bookCard.volumeInfo.categories || 'Categories not found'}</p>
+          <h5 id='${bookCard.id}' class="card-text card-body">${bookCard.volumeInfo.title}</h5>
+          <h6 id='${bookCard.id}' class="card-text card-body">Authors:
+            </br>${bookCard.volumeInfo.authors || 'Authors not found'}</p>
+          <h6 id='${bookCard.id}' class="card-text card-body">Categories:
+            </br>${bookCard.volumeInfo.categories || 'Categories not found'}</p>
         </div>
+        ${btn}
       </div>
     </div>
   `
+}
+const generateButton = (bookId) => {
+  for (let i=0; i< likedList.length; i++){
+    if(bookId === likedList[i].bookId){
+      return `<button id='${bookId}' type="button" class="btn btn-success like-btn disabled">Liked</button>`
+    }
+  }
+  return `<button id='${bookId}' type="button" class="btn btn-success like-btn">Add it to My BookList!</button>`
 }
 
 const generateBookCards = ({ isLoading, bookCards = [] } = {}) => {
@@ -42,25 +58,59 @@ const generatePage = (info) => {
 
 $(document).ready(() => {
 
+  axios({
+    method: 'GET',
+    url:`/api/my/likeslist`
+  }).then((resp) => {
+    likedList = resp.data.likedBooks
+  })
+  let autoSearch = 'Become a Web Developer'
+  axios({
+    method: 'GET',
+    url: `/api/books/search/${autoSearch}&notFound&notFound`
+  }).then((resp) => {
+    console.log(resp.data);
+    generatePage({ bookCards: resp.data.items})
+    $('#pages-books-index').prepend(`<h1>Results for Searching "${autoSearch}"</h1>`)
+  })
+
 $('#search-form').on('submit',(e) => {
     e.preventDefault()
     generatePage({ isLoading: true })
     const data = parseFormData(new FormData(e.target))
-    const url = `/api/books/search/${data.title? `${data.title}` : 'notFound'}${data.author? `&${data.author}` : '&notFound'}${data.category? `+${data.category}` : '&notFound'}`
+    const title = data.title
+    const author = data.author
+    const category = data.category
+    const url = `/api/books/search/${title? `${title}` : 'notFound'}${author? `&${author}` : '&notFound'}${category? `+${category}` : '&notFound'}`
     axios({
       method: 'GET',
       url
     }).then((resp) => {
       console.log(resp.data);
       generatePage({ bookCards: resp.data.items})
+      $('#pages-books-index').prepend(`<h1>Results for Searching "${title} + ${author} + ${category}"</h1>`)
     })
   })
 
   $('#pages-books-index').on('click','.book-card',(e) => {
-    window.location.href = `my/book/${e.target.id}`
+    axios({
+      method: 'PUT',
+      url:`/api/my/record/${e.target.id}`,
+    }).then((resp) => {
+    window.location.href = `book/${e.target.id}`
+    })
+  })
 
+    $('#pages-books-index').on('click','.like-btn',(e) => {
+    $(e.target).attr('disabled', true).text('Liked')
+    axios({
+      method: 'PUT',
+      url:`/api/my/like/${e.target.id}`,
+    })
   })
 })
+
+
 </script>
 
 <%- contentFor('body') %>

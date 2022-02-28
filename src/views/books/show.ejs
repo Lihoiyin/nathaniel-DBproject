@@ -8,7 +8,7 @@ const generateBookCard = (bookCard) => {
     <div class="col-10" style="padding: 15px;">
       <div id="${bookCard.id}" class="card book-card" style="margin-top: 15px;">
         <div class="d-flex justify-content-center">
-          <img src="${bookCard.volumeInfo.imageLinks?.smallThumbnail || '../../images/img-not-found.jpg' }" class="card-img-top" style="width:35%" alt="...">
+          <img src="${bookCard.volumeInfo.imageLinks?.smallThumbnail || 'https://www.salonlfc.com/wp-content/uploads/2018/01/image-not-found-scaled-1150x647.png' }" class="card-img-top" style="width:35%" alt="...">
         </div>
         <div class="card-body">
           <h5 class="card-title">${bookCard.volumeInfo.title}</h5>

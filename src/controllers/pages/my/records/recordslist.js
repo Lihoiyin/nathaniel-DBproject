@@ -1,5 +1,5 @@
 const controllersPagesRecordslist = async (req, res) => {
-  res.render('records/recordslist')
+  res.render('my/records/recordslist')
 }
 
 export default controllersPagesRecordslist

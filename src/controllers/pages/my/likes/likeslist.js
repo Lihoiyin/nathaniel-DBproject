@@ -1,5 +1,5 @@
 const controllersPagesLikeslist = async (req, res) => {
-  res.render('likes/likeslist')
+  res.render('my/likes/likeslist')
 }
 
 export default controllersPagesLikeslist
