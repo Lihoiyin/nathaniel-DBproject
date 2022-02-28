@@ -6,7 +6,7 @@
 const bookId = window.location.href.split('/').reverse()[0]
 const generateBookCard = (bookCard) => {
   return `
-
+  <!-- ShareThis BEGIN -->
     <div class="col-10" style="padding: 15px;">
       <div id="${bookCard.id}" class="card book-card" style="margin-top: 15px;">
         <div class="d-flex justify-content-center">
@@ -24,7 +24,7 @@ const generateBookCard = (bookCard) => {
         </div>
       </div>
     </div>
-
+    <!-- ShareThis END -->
   `
 }
 
