@@ -73,6 +73,15 @@ $('#search-form').on('submit',(e) => {
     })
   })
 
+    $('#pages-books-index').on('click','.book-card',(e) => {
+    axios({
+      method: 'PUT',
+      url:`/api/my/record/${e.target.id}`,
+    }).then((resp) => {
+    window.location.href = `book/${e.target.id}`
+    })
+  })
+
 })
 
 
