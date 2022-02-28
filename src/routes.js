@@ -5,8 +5,6 @@ const router = Router()
 
 // STATIC
 router.get('/', (await import('./controllers/pages/books/index.js')).default)
-// test
-router.get('/123', (await import('./controllers/api/my/likes/test.js')).default)
 // API | BOOKS
 router.get('/api/books/search/:q1&:q2&:q3', (await import('./controllers/api/books/search.js')).default)
 router.get('/api/books/show/:bookId', (await import('./controllers/api/books/show.js')).default)
