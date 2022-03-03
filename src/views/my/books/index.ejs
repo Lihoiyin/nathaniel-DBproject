@@ -3,11 +3,62 @@
 <%- contentFor('scripts') %>
 <script>
 let likedList
-
-
+let results = []
+let totalResults = 0
+let counter = 0
+const generateFilter = ({ queries: { q, orderBy, sortBy } = {} } = {}) => {
+  return `
+    <form id="filter" class="row row-cols-lg-auto g-3 justify-content-center align-items-center mb-3">
+      <div class="col-12">
+        <div class="input-group">
+          <div class="input-group-text">Search</div>
+          <input class="form-control" placeholder="Content" name="q" type="text" value="${q || ''}">
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="input-group">
+          <div class="input-group-text">Order By</div>
+          <select class="form-select" name="orderBy" value="${orderBy || ''}">
+            <option ${orderBy === 'title' ? 'selected' : ''} value="title">Title</option>
+            <option ${orderBy === 'Authors' ? 'selected' : ''} value="authors">Authors</option>
+            <option ${orderBy === 'category' ? 'selected' : ''} value="category">Category</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="input-group">
+          <div class="input-group-text">Sort By</div>
+          <select class="form-select" name="sortBy">
+            <option ${sortBy === 'asc' ? 'selected' : ''} value="asc">Ascending</option>
+            <option ${sortBy === 'desc' ? 'selected' : ''} value="desc">Descending</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-12">
+        <button class="btn btn-primary" type="submit" >Sort</button>
+      </div>
+    </form>
+  `
+}
+const generatePagination = (isLoading, { currentPage = 1, totalPages = 1 } = {}) => {
+  let links = ''
+  if (totalPages > 2 && currentPage > 1) links += `<li class="page-item"><a class="page-link" href="#" data-page="1">First</a></li>`
+  if (currentPage - 1 >= 1) links += `<li class="page-item"><a class="page-link" href="#" data-page="${currentPage - 1}">Prev</a></li>`
+  if (currentPage - 2 >= 1) links += `<li class="page-item"><a class="page-link" href="#" data-page="${currentPage - 2}">${currentPage - 2}</a></li>`
+  if (currentPage - 1 >= 1) links += `<li class="page-item"><a class="page-link" href="#" data-page="${currentPage - 1}">${currentPage - 1}</a></li>`
+  links += `<li class="page-item active"><a class="page-link">${currentPage}</a></li>`
+  if (currentPage + 1 <= totalPages) links += `<li class="page-item"><a class="page-link" href="#" data-page="${currentPage + 1}">${currentPage + 1}</a></li>`
+  if (currentPage + 2 <= totalPages) links += `<li class="page-item"><a class="page-link" href="#" data-page="${currentPage + 2}">${currentPage + 2}</a></li>`
+  if (currentPage + 1 <= totalPages) links += `<li class="page-item"><a class="page-link" href="#" data-page="${currentPage + 1}">Next</a></li>`
+  if (totalPages > 2 && currentPage < totalPages) links += `<li class="page-item"><a class="page-link" href="#" data-page="${totalPages}">Last</a></li>`
+  return `
+    <ul class="pagination justify-content-center mt-3">
+      ${links}
+    </ul>
+  `
+}
 const generateBookCard = (bookCard) => {
   let btn = generateButton(bookCard.id)
-  console.log(btn);
   return `
     <div class="col-12 col-md-5 col-lg-3 cards-holder" style="padding: 15px;">
       <div class="card" style="margin-top: 15px;height:100%;">
@@ -33,8 +84,7 @@ const generateButton = (bookId) => {
   return `<button id='${bookId}' type="button" class="btn btn-success like-btn">Add it to My BookList!</button>`
 }
 
-const generateBookCards = ({ isLoading, bookCards = [] } = {}) => {
-  if (isLoading) return `<div class="text-center mb-3">Loading...</div>`
+const generateBookCards = (bookCards = results) => {
   if (bookCards.length === 0) {
     return `
       <h2 class="text-center mb-3">No Books Found!</h2>
@@ -44,7 +94,8 @@ const generateBookCards = ({ isLoading, bookCards = [] } = {}) => {
     <div class="row">
       <div class="">
         <div id="books-list" class="row d-flex align-items-stretch justify-content-around">
-          ${bookCards.map((bookCard) => generateBookCard(bookCard)).join('')}
+          ${bookCards.map((bookCard) =>
+            generateBookCard(bookCard)).join('')}
         </div>
       </div>
     </div>
@@ -53,8 +104,10 @@ const generateBookCards = ({ isLoading, bookCards = [] } = {}) => {
 
 const generatePage = (info) => {
   const $page = $('#pages-books-index')
+  const $filter = generateFilter()
+  const $pagination = generatePagination()
   const $bookCards = generateBookCards(info)
-  $page.html('').fadeOut().append($bookCards)
+  $page.html('').append($filter).append($bookCards).append($pagination)
 }
 
 $(document).ready(() => {
@@ -68,28 +121,43 @@ $(document).ready(() => {
   let autoSearch = 'Become a Web Developer'
   axios({
     method: 'GET',
-    url: `/api/books/search/${autoSearch}&notFound&notFound`
+    url: `/api/books/search/${autoSearch}&notFound&notFound&10`
   }).then((resp) => {
-    console.log(resp.data);
-    generatePage({ bookCards: resp.data.items})
-    $('#pages-books-index').prepend(`<h1>Results for Searching "${autoSearch}"</h1>`).fadeIn(800)
+    totalResults = resp.data.totalItems
+    for(let i =0; i<Math.ceil(resp.data.totalItems/40);i++){
+      axios({
+        method: 'GET',
+        url: `/api/books/search/${autoSearch}&notFound&notFound&${i}`
+      }).then((resp) => {
+        for(let i=0; i<resp.data.items.length;i++){
+          results[counter] = resp.data.items[i]
+          counter++
+        }
+      }).then((results) => {
+        generatePage(results)
+        $('#pages-books-index').prepend(`<h1>Results for Searching "${autoSearch}"</h1>`).fadeIn(800)
+      })
+    }
   })
+
+
+
+
 
 
 $('#search-form').on('submit',(e) => {
     e.preventDefault()
     generatePage({ isLoading: true })
     const data = parseFormData(new FormData(e.target))
-    const url = `/api/books/search/${data.title? `${data.title}` : 'notFound'}${data.author? `&${data.author}` : '&notFound'}${data.category? `&${data.category}` : '&notFound'}`
+    const url = `/api/books/search/${data.title? `${data.title}` : 'notFound'}${data.author? `&${data.author}` : '&notFound'}${data.category? `&${data.category}` : '&notFound'}&10`
     axios({
       method: 'GET',
       url
     }).then((resp) => {
-      console.log(resp.data);
-      generatePage({ bookCards: resp.data.items})
+      generatePage(resp.data.items)
       const title = data.title? (data.author? data.title + ' + ' : data.title) : ''
       const author = data.author? (data.category? data.author + ' + ' : data.author) : ''
-      const category = data.category
+      const category = data.category? (!data.author&&data.title? ' + ' + data.category  : data.category) : ''
       $('#pages-books-index').prepend(`<h1>Results for Searching "${title}${author}${category}"</h1>`).fadeIn(800)
     })
   })
@@ -109,6 +177,68 @@ $('#search-form').on('submit',(e) => {
       method: 'PUT',
       url:`/api/my/like/${e.target.id}`,
     })
+  })
+
+  $('#pages-books-index').on('submit', '#filter', (e) => {
+    e.preventDefault()
+    const queries = parseFormData(new FormData(e.target))
+
+    let newData = results.filter(result =>
+      String(result.volumeInfo.title).toLowerCase().includes(queries.q.toLowerCase()) ||
+      String(result.volumeInfo.authors).toLowerCase().includes(queries.q.toLowerCase()) ||
+      String(result.volumeInfo.categories).toLowerCase().includes(queries.q.toLowerCase())
+      )
+    results = newData
+
+  if(queries.orderBy === 'title'){
+    console.log('title');
+    function compare( a, b ){
+      if ( a.volumeInfo.title < b.volumeInfo.title ){
+        return -1;
+      }
+      if ( a.volumeInfo.title > b.volumeInfo.title ){
+        return 1;
+      }
+      return 0
+    }
+    results.sort( compare );
+  }
+
+  if(queries.orderBy === 'authors'){
+    console.log('authors');
+    function compare( a, b ){
+      if ( a.volumeInfo.authors < b.volumeInfo.authors ){
+        return -1;
+      }
+      if ( a.volumeInfo.authors > b.volumeInfo.authors ){
+        return 1;
+      }
+      return 0
+    }
+    results.sort( compare );
+  }
+
+  if(queries.orderBy === 'category'){
+    console.log('category');
+    function compare( a, b ){
+      if ( a.volumeInfo.categories < b.volumeInfo.categories ){
+        return -1;
+      }
+      if ( a.volumeInfo.categories > b.volumeInfo.categories ){
+        return 1;
+      }
+      return 0
+    }
+    results.sort( compare );
+  }
+
+  if(queries.sortBy === 'desc'){
+    console.log('desc');
+    results.reverse();
+  }
+
+    console.log(results)
+    generatePage(results)
   })
 })
 
