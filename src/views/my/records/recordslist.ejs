@@ -3,7 +3,7 @@
 <script>
 const generateBookCard = (bookCard) => {
   return `
-    <div class="col-12 col-md-5 col-lg-3" style="padding: 15px;">
+    <div id='${bookCard.id}' class="col-12 col-md-5 col-lg-3 cards-holder" style="padding: 15px;">
       <div class="card" style="margin-top: 15px;height:100%;">
       <img id='${bookCard.id}' src="${bookCard.volumeInfo.imageLinks?.thumbnail || 'https://www.salonlfc.com/wp-content/uploads/2018/01/image-not-found-scaled-1150x647.png' }" class="card-img-top book-card" style="height: 250px;" alt="...">
         <div id='${bookCard.id}' class="card-body book-card">
@@ -34,8 +34,8 @@ const generatePage = (info) => {
       console.log(resp.data);
       $page.append(generateBookCard(resp.data))
     })
-
   });
+
 }
 
 $(document).ready(() => {
@@ -46,7 +46,7 @@ $(document).ready(() => {
       console.log(resp.data.bookRecords);
       generatePage(resp.data.bookRecords)
     })
-
+      $('#holder').fadeIn(2000)
       $('#pages-books-index').on('click','.book-card',(e) => {
     axios({
       method: 'PUT',
@@ -59,10 +59,10 @@ $(document).ready(() => {
 </script>
 
 <%- contentFor('body') %>
-<div id="pages-books-index" class="container">
+<div id="pages-books-index" class="container" style="display:flex">
     <div class="row">
-      <div class="">
-        <div id="books-list" class="row d-flex align-items-stretch justify-content-around">
+      <div id='holder'>
+        <div id="books-list" class="row d-flex align-items-stretch justify-content-around ">
         </div>
       </div>
     </div>

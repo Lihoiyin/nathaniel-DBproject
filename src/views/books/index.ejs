@@ -52,7 +52,7 @@ $(document).ready(() => {
   }).then((resp) => {
     console.log(resp.data);
     generatePage({ bookCards: resp.data.items})
-    $('#pages-books-index').prepend(`<h1>Results for Searching "${autoSearch}"</h1>`)
+    $('#pages-books-index').prepend(`<h1>Results for Searching "${autoSearch}"</h1>`).fadeIn(800)
   })
 
 $('#search-form').on('submit',(e) => {
@@ -69,7 +69,7 @@ $('#search-form').on('submit',(e) => {
       const title = data.title? (data.author? data.title + ' + ' : data.title) : ''
       const author = data.author? (data.category? data.author + ' + ' : data.author) : ''
       const category = data.category
-      $('#pages-books-index').prepend(`<h1>Results for Searching "${title}${author}${category}"</h1>`)
+      $('#pages-books-index').prepend(`<h1>Results for Searching "${title}${author}${category}"</h1>`).fadeIn(800)
     })
   })
   $('#pages-books-index').on('click','.book-card',(e) => {

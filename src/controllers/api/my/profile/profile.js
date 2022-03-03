@@ -3,7 +3,7 @@ import _ from 'lodash'
 import prisma from '../../../_helpers/prisma.js'
 import handleErrors from '../../../_helpers/handle-errors.js'
 
-const controllersApiMyProfileUpdate = async (req, res) => {
+const controllersApiMyProfile = async (req, res) => {
   try {
     const { session: { user: { id } } } = req
     const foundUser = await prisma.user.findUnique({ where: { id }, rejectOnNotFound: true })
@@ -14,4 +14,4 @@ const controllersApiMyProfileUpdate = async (req, res) => {
   }
 }
 
-export default controllersApiMyProfileUpdate
+export default controllersApiMyProfile

@@ -1,10 +1,13 @@
 <%- contentFor('styles') %>
 <%- contentFor('scripts') %>
+<script type='text/javascript' src='https://platform-api.sharethis.com/js/sharethis.js#property=621cbf5eee1cf3001908571e&product=inline-share-buttons' async='async'></script>
 <script>
 const bookId = window.location.href.split('/').reverse()[0]
+let commentsData
+let userId
 const generateBookCard = (bookCard) => {
   return `
-    <div class="col-10" style="padding: 15px;">
+    <div class="col-12 col-md-6" style="padding: 15px;">
       <div id="${bookCard.id}" class="card book-card" style="margin-top: 15px;">
         <div class="d-flex justify-content-center">
           <img src="${bookCard.volumeInfo.imageLinks?.smallThumbnail || 'https://www.salonlfc.com/wp-content/uploads/2018/01/image-not-found-scaled-1150x647.png' }" class="card-img-top" style="width:35%" alt="...">
@@ -17,31 +20,125 @@ const generateBookCard = (bookCard) => {
           <p class="card-text">Publisher: ${bookCard.volumeInfo.publisher || 'Publisher not found'}</p>
           <p class="card-text">Published Date: ${bookCard.volumeInfo.publishedDate || 'Published Date not found'}</p>
           <a href="${bookCard.volumeInfo.previewLink} target="_blank""><p class="card-text">Preview Link On Google</a>
+          <div class="sharethis-inline-share-buttons"></div>
         </div>
       </div>
     </div>
   `
 }
 
+const generateForm = () => {
+  return `
+    <div class="row card "style="margin-top: 15px">
+      <div id="form-wrapper" class="col-sm-12 col-md-10 offset-md-1offset-lg-2">
+        <form id="comment-form">
+          <div class="mb-3">
+            <label for="comment-content" class="form-label">Leave a Comment!</label>
+            <input id="user-content" class="form-control" name="content" rows="3" value="" type="text"></input>
+            <div class="invalid-feedback"></div>
+          </div>
+          <div class="mb-3">
+            <label for="comment-image" class="form-label">Image (Optional)</label>
+            <input id="comment-image" class="form-control" name="image" type="file"></input>
+            <div class="invalid-feedback"></div>
+          </div>
+          <button class="btn btn-primary" type="submit">Submit</button>
+        </form>
+      </div>
+    </div>
+  `
+}
 
-const generatePage = (info) => {
+const generateComment = (comment) => {
+  console.log(comment);
+  const link = `<a class="btn btn-primary edit-btn"
+      href="/my/editcomment/${comment.id}&${bookId}">Edit</a>`
+  return `
+      <div class="list-group-item list-group-item-action list-group-item-light d-flex">
+        <div>
+          <img src='${comment.User.avatar || ""}' style='width:50px ;margin-right:5px ;border-radius: 50% '/>
+        </div>
+        <div style="margin-top: 10px">
+          <p >: ${comment.content}</p>
+          <img src='${comment.image || ""}' style='width:150px;'/>
+        </div>
+      </div>
+      ${comment.userId === userId? link : ''}
+  `
+}
+
+const generateCommentsList = (comments) => {
+  if(comments.length === 0){
+    return `No comments`
+  }
+
+  return `
+  <div>Comments</div>
+    <div class="list-group row d-flex-flex-column">
+      ${comments.map((comment) => generateComment(comment)).join('')}
+    </div>
+  `
+}
+
+const generateCommentBoard = (comments) => {
+  return`
+  <div id='comment-board' class='d-flex flex-column col-sm-12 col-md-6' style="padding: 30px;">
+    ${generateCommentsList(comments)}
+    ${generateForm()}
+  </div>
+  `
+}
+
+
+const generatePage = (info, commentsData) => {
   const $page = $('#pages-book-index')
   const bookCard = generateBookCard(info)
-  $page.html('').append(bookCard)
+  const commentBoard = generateCommentBoard(commentsData)
+  console.log(bookCard, commentBoard);
+  $page.html('').append(bookCard).append(commentBoard)
 }
 
 $(document).ready(() => {
 
+  axios({
+    method: 'GET',
+    url: `/api/my/comments/${bookId}`
+  }).then((resp) => {
+    commentsData = resp.data
+  })
+
     axios({
-      method: 'GET',
-      url: `/api/books/show/${bookId}`
-    }).then((resp) => {
-      console.log(resp.data);
-      generatePage(resp.data)
+    method: 'GET',
+    url: `/api/my/userId`
+  }).then((resp) => {
+    userId = resp.data
+    console.log(userId);
+  })
+
+  axios({
+    method: 'GET',
+    url: `/api/books/show/${bookId}`
+  }).then((resp) => {
+    generatePage(resp.data, commentsData)
+  })
+
+  $('#pages-book-index').on('submit', '#comment-form', (e) => {
+    e.preventDefault()
+    const data = new FormData(e.target)
+    $('#comment-form button[type="submit"]').attr('disabled', true)
+    axios({
+      method: 'PUT',
+      url: `/api/my/comment/${bookId}`,
+      data
+    }).then(() => {
+      window.location.href = `/my/book/${bookId}`
+    }).catch((err) => {
     })
+  })
+
 })
 </script>
 
 <%- contentFor('body') %>
 
-<div id="pages-book-index" class="container d-flex justify-content-center"></div>
+<div id="pages-book-index" class="container d-flex justify-content-center flex-sm-column flex-md-row flex-lg-row"></div>

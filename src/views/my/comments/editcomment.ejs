@@ -1,0 +1,86 @@
+<%- contentFor('styles') %>
+<%- contentFor('scripts') %>
+<script>
+const bookId = window.location.href.split('/').reverse()[0].split('&')[1]
+const id =  window.location.href.split('/').reverse()[0].split('&')[0]
+const generateForm = () => {
+  return `
+    <div class="row card "style="margin-top: 15px">
+      <div id="form-wrapper" class="col-12 col-md-10 offset-md-1offset-lg-2">
+        <form id="edit-form">
+          <div class="mb-3">
+            <label for="comment-content" class="form-label">New Comment!(Required)</label>
+            <input id="user-content" class="form-control" name="content" rows="3" value="" type="text"></input>
+            <div class="invalid-feedback"></div>
+          </div>
+          <div class="mb-3">
+            <label for="comment-image" class="form-label">Image (Optional)</label>
+            <input id="comment-image" class="form-control" name="image" type="file"></input>
+            <div class="invalid-feedback"></div>
+          </div>
+          <button class="btn btn-primary" type="submit">Submit</button>
+
+        </form>
+        <button id="del-btn" type="button" class="btn btn-danger">Delete this comment</button>
+      </div>
+    </div>
+  `
+}
+
+const generateComment = (comment) => {
+  console.log(comment);
+  return `
+      <div class="list-group-item list-group-item-action list-group-item-light d-flex">
+        <div>
+          <img src='${comment.User.avatar || ""}' style='width:50px ;margin-right:5px ;border-radius: 50% '/>
+        </div>
+        <div style="margin-top: 10px">
+          <p >: ${comment.content}</p>
+          <img src='${comment.image || ""}' style='width:150px;'/>
+        </div>
+      </div>
+  `
+}
+const generatePage = (comment) => {
+  const $page = $('#pages-edit')
+  const $comment = generateComment(comment)
+  const $form = generateForm()
+  $page.html('').append($comment).append($form)
+}
+$(document).ready(() => {
+    axios({
+    method: 'GET',
+    url: `/api/my/commentshow/${id}`
+  }).then((resp) => {
+    generatePage(resp.data)
+  })
+  $('#pages-edit').on('submit', '#edit-form', (e) => {
+    e.preventDefault()
+    const data = new FormData(e.target)
+    console.log(data);
+    $('#edit-form button[type="submit"]').attr('disabled', true)
+    axios({
+      method: 'PUT',
+      url: `/api/my/editcomment/${id}&${bookId}`,
+      data
+    }).then(() => {
+      window.location.href = `/my/book/${bookId}`
+    }).catch(()=>{
+      window.location.href = `/my/editcomment/${id}&${bookId}`
+    })
+  })
+
+    $('#pages-edit').on('click', '#del-btn', () => {
+    $('#del-btn').attr('disabled', true)
+    console.log(123);
+    axios({
+      method: 'PUT',
+      url: `/api/my/deletecomment/${id}`,
+    }).then(() => {
+      window.location.href = `/my/book/${bookId}`
+    })
+  })
+})
+</script>
+<%- contentFor('body') %>
+<div id="pages-edit" class="container"></div>

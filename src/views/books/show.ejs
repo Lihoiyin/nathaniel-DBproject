@@ -1,13 +1,12 @@
-
 <%- contentFor('styles') %>
 <%- contentFor('scripts') %>
-<script type="text/javascript" src="https://platform-api.sharethis.com/js/sharethis.js#property=621cbf5eee1cf3001908571e&product=inline-share-buttons" async="async"></script>
+<script type='text/javascript' src='https://platform-api.sharethis.com/js/sharethis.js#property=621cbf5eee1cf3001908571e&product=inline-share-buttons' async='async'></script>
 <script>
 const bookId = window.location.href.split('/').reverse()[0]
+let commentsData
 const generateBookCard = (bookCard) => {
   return `
-  <!-- ShareThis BEGIN -->
-    <div class="col-10" style="padding: 15px;">
+    <div class="col-12 col-md-6" style="padding: 15px;">
       <div id="${bookCard.id}" class="card book-card" style="margin-top: 15px;">
         <div class="d-flex justify-content-center">
           <img src="${bookCard.volumeInfo.imageLinks?.smallThumbnail || 'https://www.salonlfc.com/wp-content/uploads/2018/01/image-not-found-scaled-1150x647.png' }" class="card-img-top" style="width:35%" alt="...">
@@ -19,34 +18,79 @@ const generateBookCard = (bookCard) => {
           <p class="card-text">Language: ${bookCard.volumeInfo.language || 'Language not found'}</p>
           <p class="card-text">Publisher: ${bookCard.volumeInfo.publisher || 'Publisher not found'}</p>
           <p class="card-text">Published Date: ${bookCard.volumeInfo.publishedDate || 'Published Date not found'}</p>
-          <a href="${bookCard.volumeInfo.previewLink}" target="_blank"><p class="card-text">Preview Link On Google</a>
+          <a href="${bookCard.volumeInfo.previewLink} target="_blank""><p class="card-text">Preview Link On Google</a>
           <div class="sharethis-inline-share-buttons"></div>
         </div>
       </div>
     </div>
-    <!-- ShareThis END -->
   `
 }
 
 
-const generatePage = (info) => {
+
+const generateComment = (comment) => {
+  console.log(comment);
+  return `
+      <div class="list-group-item list-group-item-action list-group-item-light d-flex">
+        <div>
+          <img src='${comment.User.avatar || ""}' style='width:50px ;margin-right:5px ;border-radius: 50% '/>
+        </div>
+        <div style="margin-top: 10px">
+          <p >: ${comment.content}</p>
+          <img src='${comment.image || ""}' style='width:150px;'/>
+        </div>
+      </div>
+  `
+}
+
+const generateCommentsList = (comments) => {
+  if(comments.length === 0){
+    return `No comments`
+  }
+
+  return `
+  <div>Comments</div>
+    <div class="list-group row d-flex-flex-column">
+      ${comments.map((comment) => generateComment(comment)).join('')}
+    </div>
+  `
+}
+
+const generateCommentBoard = (comments) => {
+  return`
+  <div id='comment-board' class='d-flex flex-column col-12 col-md-6' style="padding: 30px;">
+    ${generateCommentsList(comments)}
+  </div>
+  `
+}
+
+
+const generatePage = (info, commentsData) => {
   const $page = $('#pages-book-index')
   const bookCard = generateBookCard(info)
-  $page.html('').append(bookCard)
+  const commentBoard = generateCommentBoard(commentsData)
+  $page.html('').append(bookCard).append(commentBoard).fadeIn(800)
 }
 
 $(document).ready(() => {
 
-    axios({
-      method: 'GET',
-      url: `/api/books/show/${bookId}`
-    }).then((resp) => {
-      console.log(resp.data);
-      generatePage(resp.data)
-    })
+  axios({
+    method: 'GET',
+    url: `/api/comments/${bookId}`
+  }).then((resp) => {
+    commentsData = resp.data
+  })
+
+  axios({
+    method: 'GET',
+    url: `/api/books/show/${bookId}`
+  }).then((resp) => {
+    generatePage(resp.data, commentsData)
+  })
+
+
 })
 </script>
 
 <%- contentFor('body') %>
-
-<div id="pages-book-index" class="container container d-flex justify-content-center"></div>
+<div id="pages-book-index" class="container d-flex justify-content-center flex-sm-column flex-md-row flex-lg-row"></div>

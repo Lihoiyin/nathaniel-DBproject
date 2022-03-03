@@ -1,1 +1,24 @@
 @import 'node_modules/bootstrap/scss/bootstrap';
+
+#holder,
+.container {
+  display: none;
+}
+
+
+.cards-holder {
+  margin-top: 50px;
+  transition: transform 1000ms;
+}
+
+
+.cards-holder:focus,
+.cards-holder:hover {
+  transform: scale(1.2);
+  z-index: 1;
+}
+
+.book-card img {
+  display: block;
+  max-width: 100%;
+}

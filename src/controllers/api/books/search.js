@@ -12,7 +12,7 @@ const controllersApiSearch = async (req, res) => {
   if (q3 === 'notFound') {
     q3 = ''
   }
-  console.log(q1, q2, q3)
+
   const url = `https://www.googleapis.com/books/v1/volumes?q=${q1}+subject:${q3}+inauthor:${q2}&printType=books&maxResults=40&key=AIzaSyB5noX_cJTwroPi1fLZ_qyJtI94Ah6qWKU`
   const booksData = await fetch(
     url,
