@@ -18,8 +18,8 @@ const generateBookCard = (bookCard) => {
           <p class="card-text">Language: ${bookCard.volumeInfo.language || 'Language not found'}</p>
           <p class="card-text">Publisher: ${bookCard.volumeInfo.publisher || 'Publisher not found'}</p>
           <p class="card-text">Published Date: ${bookCard.volumeInfo.publishedDate || 'Published Date not found'}</p>
-          <a href="${bookCard.volumeInfo.previewLink} target="_blank""><p class="card-text">Preview Link On Google</a>
-          <div class="sharethis-inline-share-buttons"></div>
+          <div class="sharethis-inline-share-buttons" style="min-height: 100px;"></div>
+          <a href="${bookCard.volumeInfo.previewLink}" target="_blank"  class="btn btn-success";>Preview Link On Google</a>
         </div>
       </div>
     </div>

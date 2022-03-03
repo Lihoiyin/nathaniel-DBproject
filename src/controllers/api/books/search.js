@@ -17,7 +17,7 @@ const controllersApiSearch = async (req, res) => {
     q3 = `+subject:${q3}`
   }
   q4 = Number(q4) === 0 ? 1 : 40 * Number(q4)
-  const url = `https://www.googleapis.com/books/v1/volumes?q=${q1}${q3}${q2}&printType=books&maxResults=40&startIndex=${q4}&key=AIzaSyB5noX_cJTwroPi1fLZ_qyJtI94Ah6qWKU`
+  const url = `https://www.googleapis.com/books/v1/volumes?q=${q1}${q3}${q2}&printType=books&maxResults=40&startIndex=${q4}&key=AIzaSyCbrno5Uddb9zY3QozCbiuEA1tHIpmFvhg`
   const booksData = await fetch(
     url,
     { method: 'GET' }

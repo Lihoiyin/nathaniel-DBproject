@@ -5,6 +5,8 @@
 let likedList
 let results = []
 let totalResults = 0
+let pagesNum = 2
+let currentPage = 1
 let counter = 0
 const generateFilter = ({ queries: { q, orderBy, sortBy } = {} } = {}) => {
   return `
@@ -40,27 +42,11 @@ const generateFilter = ({ queries: { q, orderBy, sortBy } = {} } = {}) => {
     </form>
   `
 }
-const generatePagination = (isLoading, { currentPage = 1, totalPages = 1 } = {}) => {
-  let links = ''
-  if (totalPages > 2 && currentPage > 1) links += `<li class="page-item"><a class="page-link" href="#" data-page="1">First</a></li>`
-  if (currentPage - 1 >= 1) links += `<li class="page-item"><a class="page-link" href="#" data-page="${currentPage - 1}">Prev</a></li>`
-  if (currentPage - 2 >= 1) links += `<li class="page-item"><a class="page-link" href="#" data-page="${currentPage - 2}">${currentPage - 2}</a></li>`
-  if (currentPage - 1 >= 1) links += `<li class="page-item"><a class="page-link" href="#" data-page="${currentPage - 1}">${currentPage - 1}</a></li>`
-  links += `<li class="page-item active"><a class="page-link">${currentPage}</a></li>`
-  if (currentPage + 1 <= totalPages) links += `<li class="page-item"><a class="page-link" href="#" data-page="${currentPage + 1}">${currentPage + 1}</a></li>`
-  if (currentPage + 2 <= totalPages) links += `<li class="page-item"><a class="page-link" href="#" data-page="${currentPage + 2}">${currentPage + 2}</a></li>`
-  if (currentPage + 1 <= totalPages) links += `<li class="page-item"><a class="page-link" href="#" data-page="${currentPage + 1}">Next</a></li>`
-  if (totalPages > 2 && currentPage < totalPages) links += `<li class="page-item"><a class="page-link" href="#" data-page="${totalPages}">Last</a></li>`
-  return `
-    <ul class="pagination justify-content-center mt-3">
-      ${links}
-    </ul>
-  `
-}
-const generateBookCard = (bookCard) => {
+
+const generateBookCard = (bookCard, index) => {
   let btn = generateButton(bookCard.id)
   return `
-    <div class="col-12 col-md-5 col-lg-3 cards-holder" style="padding: 15px;">
+    <div  id='card${index}' class="col-12 col-md-5 col-lg-3 cards-holder" style="padding: 15px;display:none;">
       <div class="card" style="margin-top: 15px;height:100%;">
       <img id='${bookCard.id}' src="${bookCard.volumeInfo.imageLinks?.thumbnail || 'https://www.salonlfc.com/wp-content/uploads/2018/01/image-not-found-scaled-1150x647.png' }" class="card-img-top book-card" style="height: 250px;" alt="...">
         <div id='${bookCard.id}' class="card-body book-card">
@@ -94,24 +80,28 @@ const generateBookCards = (bookCards = results) => {
     <div class="row">
       <div class="">
         <div id="books-list" class="row d-flex align-items-stretch justify-content-around">
-          ${bookCards.map((bookCard) =>
-            generateBookCard(bookCard)).join('')}
+          ${bookCards.map((bookCard, index) =>
+            generateBookCard(bookCard, index)).join('')}
         </div>
       </div>
+      <div class="d-flex justify-content-center mt-5 mb-5">
+        <button id='more-btn' type="button" class="btn btn-warning col-12">Show More</button>
+      </div>
     </div>
+
   `
 }
 
 const generatePage = (info) => {
   const $page = $('#pages-books-index')
   const $filter = generateFilter()
-  const $pagination = generatePagination()
   const $bookCards = generateBookCards(info)
-  $page.html('').append($filter).append($bookCards).append($pagination)
+  $page.html('').append($filter).append($bookCards)
 }
 
 $(document).ready(() => {
-
+  pagesNum = 2
+  currentPage = 1
   axios({
     method: 'GET',
     url:`/api/my/likeslist`
@@ -124,11 +114,13 @@ $(document).ready(() => {
     url: `/api/books/search/${autoSearch}&notFound&notFound&10`
   }).then((resp) => {
     totalResults = resp.data.totalItems
+    console.log(totalResults);
     for(let i =0; i<Math.ceil(resp.data.totalItems/40);i++){
       axios({
         method: 'GET',
         url: `/api/books/search/${autoSearch}&notFound&notFound&${i}`
       }).then((resp) => {
+
         for(let i=0; i<resp.data.items.length;i++){
           results[counter] = resp.data.items[i]
           counter++
@@ -136,29 +128,50 @@ $(document).ready(() => {
       }).then((results) => {
         generatePage(results)
         $('#pages-books-index').prepend(`<h1>Results for Searching "${autoSearch}"</h1>`).fadeIn(800)
+        for(let i=0; i<39; i++){
+          $(`#card${i}`).show()
+        }
       })
     }
   })
 
-
-
-
-
-
 $('#search-form').on('submit',(e) => {
     e.preventDefault()
-    generatePage({ isLoading: true })
+    pagesNum = 2
+    currentPage = 1
+    results = []
+    counter = 0
     const data = parseFormData(new FormData(e.target))
     const url = `/api/books/search/${data.title? `${data.title}` : 'notFound'}${data.author? `&${data.author}` : '&notFound'}${data.category? `&${data.category}` : '&notFound'}&10`
     axios({
       method: 'GET',
       url
     }).then((resp) => {
-      generatePage(resp.data.items)
+      totalResults = resp.data.totalItems
       const title = data.title? (data.author? data.title + ' + ' : data.title) : ''
       const author = data.author? (data.category? data.author + ' + ' : data.author) : ''
       const category = data.category? (!data.author&&data.title? ' + ' + data.category  : data.category) : ''
+      $('h1').html('')
       $('#pages-books-index').prepend(`<h1>Results for Searching "${title}${author}${category}"</h1>`).fadeIn(800)
+      console.log(totalResults);
+      for(let i =0; i<Math.ceil(resp.data.totalItems/40);i++){
+        axios({
+          method: 'GET',
+          url: `/api/books/search/${data.title? `${data.title}` : 'notFound'}${data.author? `&${data.author}` : '&notFound'}${data.category? `&${data.category}` : '&notFound'}&${i}`
+        }).then((resp) => {
+          console.log(resp.data);
+          for(let i=0; i<resp.data.items.length;i++){
+            results[counter] = resp.data.items[i]
+            counter++
+          }
+        }).then((results) => {
+          generatePage(results)
+          $('#pages-books-index').prepend(`<h1>Results for Searching "${title}${author}${category}"</h1>`).fadeIn(800)
+          for(let i=0; i<39; i++){
+            $(`#card${i}`).show()
+          }
+        })
+      }
     })
   })
 
@@ -181,8 +194,9 @@ $('#search-form').on('submit',(e) => {
 
   $('#pages-books-index').on('submit', '#filter', (e) => {
     e.preventDefault()
+    pagesNum = 2
+    currentPage = 1
     const queries = parseFormData(new FormData(e.target))
-
     let newData = results.filter(result =>
       String(result.volumeInfo.title).toLowerCase().includes(queries.q.toLowerCase()) ||
       String(result.volumeInfo.authors).toLowerCase().includes(queries.q.toLowerCase()) ||
@@ -239,8 +253,25 @@ $('#search-form').on('submit',(e) => {
 
     console.log(results)
     generatePage(results)
+    $('#pages-books-index').prepend(`<h1>Total : ${results.length} results found</h1>`).fadeIn(800)
+    for(let i=0; i<39; i++){
+    $(`#card${i}`).show()
+    }
+  })
+
+  $('#pages-books-index').on('click', '#more-btn', (e) => {
+    for(let i= currentPage*40; i<pagesNum*40 -1; i++){
+      $(`#card${i}`).show()
+    }
+    currentPage++
+    pagesNum++
+    console.log(results.length, currentPage, pagesNum);
+    if (pagesNum*40 >= results.length){
+      $(e.target).attr('disabled', true).text('No More Contents')
+    }
   })
 })
+
 
 
 </script>

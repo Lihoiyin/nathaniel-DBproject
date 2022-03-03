@@ -1,10 +1,51 @@
 <%- contentFor('styles') %>
+
 <%- contentFor('scripts') %>
 <script>
-
-const generateBookCard = (bookCard) => {
+let likedList
+let results = []
+let totalResults = 0
+let pagesNum = 2
+let currentPage = 1
+let counter = 0
+const generateFilter = ({ queries: { q, orderBy, sortBy } = {} } = {}) => {
   return `
-    <div class="col-12 col-md-5 col-lg-3" style="padding: 15px;">
+    <form id="filter" class="row row-cols-lg-auto g-3 justify-content-center align-items-center mb-3">
+      <div class="col-12">
+        <div class="input-group">
+          <div class="input-group-text">Search</div>
+          <input class="form-control" placeholder="Content" name="q" type="text" value="${q || ''}">
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="input-group">
+          <div class="input-group-text">Order By</div>
+          <select class="form-select" name="orderBy" value="${orderBy || ''}">
+            <option ${orderBy === 'title' ? 'selected' : ''} value="title">Title</option>
+            <option ${orderBy === 'Authors' ? 'selected' : ''} value="authors">Authors</option>
+            <option ${orderBy === 'category' ? 'selected' : ''} value="category">Category</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="input-group">
+          <div class="input-group-text">Sort By</div>
+          <select class="form-select" name="sortBy">
+            <option ${sortBy === 'asc' ? 'selected' : ''} value="asc">Ascending</option>
+            <option ${sortBy === 'desc' ? 'selected' : ''} value="desc">Descending</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-12">
+        <button class="btn btn-primary" type="submit" >Sort</button>
+      </div>
+    </form>
+  `
+}
+
+const generateBookCard = (bookCard, index) => {
+  return `
+    <div  id='card${index}' class="col-12 col-md-5 col-lg-3 cards-holder" style="padding: 15px;display:none;">
       <div class="card" style="margin-top: 15px;height:100%;">
       <img id='${bookCard.id}' src="${bookCard.volumeInfo.imageLinks?.thumbnail || 'https://www.salonlfc.com/wp-content/uploads/2018/01/image-not-found-scaled-1150x647.png' }" class="card-img-top book-card" style="height: 250px;" alt="...">
         <div id='${bookCard.id}' class="card-body book-card">
@@ -19,8 +60,7 @@ const generateBookCard = (bookCard) => {
   `
 }
 
-const generateBookCards = ({ isLoading, bookCards = [] } = {}) => {
-  if (isLoading) return `<div class="text-center mb-3">Loading...</div>`
+const generateBookCards = (bookCards = results) => {
   if (bookCards.length === 0) {
     return `
       <h2 class="text-center mb-3">No Books Found!</h2>
@@ -30,54 +70,180 @@ const generateBookCards = ({ isLoading, bookCards = [] } = {}) => {
     <div class="row">
       <div class="">
         <div id="books-list" class="row d-flex align-items-stretch justify-content-around">
-          ${bookCards.map((bookCard) => generateBookCard(bookCard)).join('')}
+          ${bookCards.map((bookCard, index) =>
+            generateBookCard(bookCard, index)).join('')}
         </div>
       </div>
+      <div class="d-flex justify-content-center mt-5 mb-5">
+        <button id='more-btn' type="button" class="btn btn-warning col-12">Show More</button>
+      </div>
     </div>
+
   `
 }
 
 const generatePage = (info) => {
   const $page = $('#pages-books-index')
+  const $filter = generateFilter()
   const $bookCards = generateBookCards(info)
-  $page.html('').append($bookCards)
+  $page.html('').append($filter).append($bookCards)
 }
 
 $(document).ready(() => {
-
+  pagesNum = 2
+  currentPage = 1
   let autoSearch = 'Become a Web Developer'
   axios({
     method: 'GET',
-    url: `/api/books/search/${autoSearch}&notFound&notFound`
+    url: `/api/books/search/${autoSearch}&notFound&notFound&10`
   }).then((resp) => {
-    console.log(resp.data);
-    generatePage({ bookCards: resp.data.items})
-    $('#pages-books-index').prepend(`<h1>Results for Searching "${autoSearch}"</h1>`).fadeIn(800)
+    totalResults = resp.data.totalItems
+    console.log(totalResults);
+    for(let i =0; i<Math.ceil(resp.data.totalItems/40);i++){
+      axios({
+        method: 'GET',
+        url: `/api/books/search/${autoSearch}&notFound&notFound&${i}`
+      }).then((resp) => {
+
+        for(let i=0; i<resp.data.items.length;i++){
+          results[counter] = resp.data.items[i]
+          counter++
+        }
+      }).then((results) => {
+        generatePage(results)
+        $('#pages-books-index').prepend(`<h1>Results for Searching "${autoSearch}"</h1>`).fadeIn(800)
+        for(let i=0; i<39; i++){
+          $(`#card${i}`).show()
+        }
+      })
+    }
   })
 
 $('#search-form').on('submit',(e) => {
     e.preventDefault()
-    generatePage({ isLoading: true })
+    pagesNum = 2
+    currentPage = 1
+    results = []
+    counter = 0
     const data = parseFormData(new FormData(e.target))
-    const url = `/api/books/search/${data.title? `${data.title}` : 'notFound'}${data.author? `&${data.author}` : '&notFound'}${data.category? `&${data.category}` : '&notFound'}`
+    const url = `/api/books/search/${data.title? `${data.title}` : 'notFound'}${data.author? `&${data.author}` : '&notFound'}${data.category? `&${data.category}` : '&notFound'}&10`
     axios({
       method: 'GET',
       url
     }).then((resp) => {
-      console.log(resp.data);
-      generatePage({ bookCards: resp.data.items})
+      totalResults = resp.data.totalItems
       const title = data.title? (data.author? data.title + ' + ' : data.title) : ''
       const author = data.author? (data.category? data.author + ' + ' : data.author) : ''
-      const category = data.category
+      const category = data.category? (!data.author&&data.title? ' + ' + data.category  : data.category) : ''
+      $('h1').html('')
       $('#pages-books-index').prepend(`<h1>Results for Searching "${title}${author}${category}"</h1>`).fadeIn(800)
+      console.log(totalResults);
+      for(let i =0; i<Math.ceil(resp.data.totalItems/40);i++){
+        axios({
+          method: 'GET',
+          url: `/api/books/search/${data.title? `${data.title}` : 'notFound'}${data.author? `&${data.author}` : '&notFound'}${data.category? `&${data.category}` : '&notFound'}&${i}`
+        }).then((resp) => {
+          console.log(resp.data);
+          for(let i=0; i<resp.data.items.length;i++){
+            results[counter] = resp.data.items[i]
+            counter++
+          }
+        }).then((results) => {
+          generatePage(results)
+          $('#pages-books-index').prepend(`<h1>Results for Searching "${title}${author}${category}"</h1>`).fadeIn(800)
+          for(let i=0; i<39; i++){
+            $(`#card${i}`).show()
+          }
+        })
+      }
     })
   })
+
   $('#pages-books-index').on('click','.book-card',(e) => {
     window.location.href = `book/${e.target.id}`
-
   })
 
+
+  $('#pages-books-index').on('submit', '#filter', (e) => {
+    e.preventDefault()
+    pagesNum = 2
+    currentPage = 1
+    const queries = parseFormData(new FormData(e.target))
+    let newData = results.filter(result =>
+      String(result.volumeInfo.title).toLowerCase().includes(queries.q.toLowerCase()) ||
+      String(result.volumeInfo.authors).toLowerCase().includes(queries.q.toLowerCase()) ||
+      String(result.volumeInfo.categories).toLowerCase().includes(queries.q.toLowerCase())
+      )
+    results = newData
+
+  if(queries.orderBy === 'title'){
+    console.log('title');
+    function compare( a, b ){
+      if ( a.volumeInfo.title < b.volumeInfo.title ){
+        return -1;
+      }
+      if ( a.volumeInfo.title > b.volumeInfo.title ){
+        return 1;
+      }
+      return 0
+    }
+    results.sort( compare );
+  }
+
+  if(queries.orderBy === 'authors'){
+    console.log('authors');
+    function compare( a, b ){
+      if ( a.volumeInfo.authors < b.volumeInfo.authors ){
+        return -1;
+      }
+      if ( a.volumeInfo.authors > b.volumeInfo.authors ){
+        return 1;
+      }
+      return 0
+    }
+    results.sort( compare );
+  }
+
+  if(queries.orderBy === 'category'){
+    console.log('category');
+    function compare( a, b ){
+      if ( a.volumeInfo.categories < b.volumeInfo.categories ){
+        return -1;
+      }
+      if ( a.volumeInfo.categories > b.volumeInfo.categories ){
+        return 1;
+      }
+      return 0
+    }
+    results.sort( compare );
+  }
+
+  if(queries.sortBy === 'desc'){
+    console.log('desc');
+    results.reverse();
+  }
+
+    console.log(results)
+    generatePage(results)
+    $('#pages-books-index').prepend(`<h1>Total : ${results.length} results found</h1>`).fadeIn(800)
+    for(let i=0; i<39; i++){
+    $(`#card${i}`).show()
+    }
+  })
+
+  $('#pages-books-index').on('click', '#more-btn', (e) => {
+    for(let i= currentPage*40; i<pagesNum*40 -1; i++){
+      $(`#card${i}`).show()
+    }
+    currentPage++
+    pagesNum++
+    console.log(results.length, currentPage, pagesNum);
+    if (pagesNum*40 >= results.length){
+      $(e.target).attr('disabled', true).text('No More Contents')
+    }
+  })
 })
+
 
 
 </script>
